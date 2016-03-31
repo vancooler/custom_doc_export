@@ -462,6 +462,7 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
     // parse education as array
     if (isset($education['und']) and is_array($education['und']) and count($education['und']) > 0){
       foreach ($education['und'] as $key => $value) {
+        $ed_id = $value['value'];
         $education_array[$key] = $value['value'];
       }
     }
@@ -469,6 +470,7 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
     // parse employer as array
     if (isset($employer['und']) and is_array($employer['und']) and count($employer['und']) > 0){
       foreach ($employer['und'] as $key => $value) {
+        $em_id = $value['value'];
         $employer_array[$key] = $value['value'];
       }
     }
