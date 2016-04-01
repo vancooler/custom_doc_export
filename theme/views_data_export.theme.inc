@@ -463,7 +463,36 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
     if (isset($education['und']) and is_array($education['und']) and count($education['und']) > 0){
       foreach ($education['und'] as $key => $value) {
         $ed_id = $value['value'];
-        $education_array[$key] = $value['value'];
+
+        $query = db_select('field_data_field_education', 'ed');
+        $query->join('field_data_field_program', 'program', "program.entity_id = ed.field_education_value AND program.entity_type = 'field_collection_item' AND program.bundle = 'field_education'");
+        $query->join('field_data_field_static_grad_date', 'date', "date.entity_id = ed.field_education_value AND date.entity_type = 'field_collection_item' AND date.bundle = 'field_education'");
+        $query->join('field_data_field_school_name_1', 'school', "school.entity_id = ed.field_education_value AND school.entity_type = 'field_collection_item' AND school.bundle = 'field_education'");
+        $query->join('field_data_field_city', 'city', "city.entity_id = ed.field_education_value AND city.entity_type = 'field_collection_item' AND city.bundle = 'field_education'");
+        $query->join('field_data_field_province', 'province', "province.entity_id = ed.field_education_value AND province.entity_type = 'field_collection_item' AND province.bundle = 'field_education'");
+        $query->fields('program', array('field_program_value'));
+        $query->fields('city', array('field_city_value'));
+        $query->fields('province', array('field_province_value'));
+        $query->fields('date', array('field_static_grad_date_value'));
+        $query->fields('school', array('field_school_name_1_value'));
+        $query->condition('ed.field_education_value', $ed_id, "=");
+        $result = $query->execute();
+
+
+        if(count($result) > 0){
+          $node_array = array();
+          foreach ($result as $row) {
+            $node_array["date"] = $row->field_static_grad_date_value;
+            $node_array["city"] = $row->field_city_value;
+            $node_array["province"] = $row->field_province_value;
+            $node_array["program"] = $row->field_program_value;
+            $node_array["school"] = $row->field_school_name_1_value;
+          }
+          $education_array[$key] = $node_array;
+        }
+
+
+        
       }
     }
 
@@ -471,7 +500,38 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
     if (isset($employer['und']) and is_array($employer['und']) and count($employer['und']) > 0){
       foreach ($employer['und'] as $key => $value) {
         $em_id = $value['value'];
-        $employer_array[$key] = $value['value'];
+        $query = db_select('field_data_field_employer', 'ed');
+        $query->leftJoin('field_data_field_job_title', 'job_title', "job_title.entity_id = ed.field_employer_value AND job_title.entity_type = 'field_collection_item' AND job_title.bundle = 'field_employer'");
+        $query->leftJoin('field_data_field_static_start_date', 'start_date', "start_date.entity_id = ed.field_employer_value AND start_date.entity_type = 'field_collection_item' AND start_date.bundle = 'field_employer'");
+        $query->leftJoin('field_data_field_static_end_date', 'end_date', "end_date.entity_id = ed.field_employer_value AND end_date.entity_type = 'field_collection_item' AND end_date.bundle = 'field_employer'");
+        $query->leftJoin('field_data_field_employer_name_1', 'employer', "employer.entity_id = ed.field_employer_value AND employer.entity_type = 'field_collection_item' AND employer.bundle = 'field_employer'");
+        $query->leftJoin('field_data_field_city', 'city', "city.entity_id = ed.field_employer_value AND city.entity_type = 'field_collection_item' AND city.bundle = 'field_employer'");
+        $query->leftJoin('field_data_field_province', 'province', "province.entity_id = ed.field_employer_value AND province.entity_type = 'field_collection_item' AND province.bundle = 'field_employer'");
+        $query->leftJoin('field_data_field_duties_1', 'duties', "duties.entity_id = ed.field_employer_value AND duties.entity_type = 'field_collection_item' AND duties.bundle = 'field_employer'");
+        $query->fields('job_title', array('field_job_title_value'));
+        $query->fields('city', array('field_city_value'));
+        $query->fields('province', array('field_province_value'));
+        $query->fields('duties', array('field_duties_1_value'));
+        $query->fields('start_date', array('field_static_start_date_value'));
+        $query->fields('end_date', array('field_static_end_date_value'));
+        $query->fields('employer', array('field_employer_name_1_value'));
+        $query->condition('ed.field_employer_value', $em_id, "=");
+        $result = $query->execute();
+
+        watchdog("CCC", "<pre>".print_r($result, true)."</pre>");
+        if(count($result) > 0){
+          $node_array = array();
+          foreach ($result as $row) {
+            $node_array["start_date"] = $row->field_static_start_date_value;
+            $node_array["end_date"] = $row->field_static_end_date_value;
+            $node_array["city"] = $row->field_city_value;
+            $node_array["province"] = $row->field_province_value;
+            $node_array["job_title"] = $row->field_job_title_value;
+            $node_array["employer"] = $row->field_employer_name_1_value;
+            $node_array["duties"] = $row->field_duties_1_value;
+          }
+          $employer_array[$key] = $node_array;
+        }
       }
     }
     // parse skills as array
@@ -491,65 +551,46 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
 <div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Work Experience
 </div>
 
-<table style="border:none">
-<tr class="row" style="margin-left: -15px;margin-right: -15px;">
-<td class="col-sm-2" style="width:20%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">2013 - 2014<br>
-Toronto, ON</td>
+<table style="border:none">';
+    watchdog("CCC", "<pre>".print_r($employer_array, true)."</pre>");
+    foreach ($employer_array as $key => $value) {
+      $output .= '
 
-<td class="col-sm-10" style="width:82%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">Customer Service Assistant | Kelly International
-<ul>
-  <li>Answered phone and assisted customers with initial inquiries</li>
-  <li>Performed basic data entry for online customer database</li>
-  <li>Established trusting relationship with customers</li>
-</ul>
-</td>
-</tr>
+    <tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px">
+    <td class="col-sm-2" style="width:25%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['start_date'].' - '.$value['end_date'].'<br>
+    '.$value['city'].', '.$value['province'].'</td>
 
-<tr class="row" style="margin-left: -15px;margin-right: -15px;">
-<td class="col-sm-2" style="width:18%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">2010 - 2011<br>
-Toronto, ON</td>
+    <td class="col-sm-10" style="width:75%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['job_title'].' | '.$value['employer'].(empty($value['duties']) ? '' : '
+    <ul>
+      '.$value['duties'].'
+    </ul>').'
+    </td>
+    </tr>';
+    }
 
-<td class="col-sm-10" style="width:82%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">Administrative Assistant Intern | Planning Reactive
-<ul>
-  <li>Educated new customers by answering product and service questions</li>
-  <li>Maintained customer record by updating account information</li>
-  <li>Reached out to existing customers for outstanding payments</li>
-</ul>
-</td>
-</tr>
-
-<tr class="row" style="margin-left: -15px;margin-right: -15px;">
-<td class="col-sm-2" style="width:18%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">2009 - 2011<br>
-Toronto, ON</td>
-
-<td class="col-sm-10" style="width:82%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">Freshman Student Body President | Centennial College
-<ul>
-  <li>Created agenda for meetings</li>
-  <li>Met with students about concerns facing the school</li>
-  <li>Organized student social events</li>
-</ul>
-</td>
-</tr>
-</table>
+$output .= '</table>
 <br>
 <div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Education
 </div>
-<table style="border:none">
-<tr class="row" style="margin-left: -15px;margin-right: -15px;">
-<td class="col-sm-2" style="width:18%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">2009 - 2013<br>
-Toronto, ON</td>
 
-<td class="col-sm-10" style="width:80%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">Centennial College<br>
-<em>Bartending Certification, Smart Serve Certification</em></td>
-</tr>
+<table style="border:none">';
+    foreach ($education_array as $key => $value) {
+      $output .= '<tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px">
+<td class="col-sm-2" style="width:25%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['date'].'<br>
+'.$value['city'].', '.$value['province'].'</td>
 
-</table>
+<td class="col-sm-10" style="width:75%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['school'].'<br>
+<em>'.$value['program'].'</em></td>
+</tr>';
+    }
+
+    $output .= '</table>
 <br>
 <div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Additional Skills &amp; Interest
 </div>
 
 <table style="border:none">
-<tr><td>
+<trclass="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px"><td>
 <ul>';
     foreach ($skills_array as $key => $value) {
       $output .= '<li>'.$value.'</li>';
