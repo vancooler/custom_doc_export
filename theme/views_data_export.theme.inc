@@ -295,155 +295,10 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
   );
   $class = 'even';
 
-  /*
-  Array
-  (
-    [0] => Array
-        (
-            [field_name] => Janine Skerratt
-            [field_address] => 33004 Desbrisay Ave
-            [field_phone] => 604-217-8028
-            [field_city] => Mission
-            [field_province] => BC
-            [field_postal_code] => V2V 7R6
-            [field_education] => 
-
-                  
-
-                    
-                June 1995
-                Quesnel Senior Secondary
-                Quesnel
-                BC
-                High School Graduate
-                Details: 
-                Business Management
-
-
-                  
-
-
-                , 
-
-                  
-
-                    
-                July 1996
-                Canadian Travel School
-                Vancouver
-                BC
-                Travel and Tourism
-  
-
-
-
-            [field_email] => g.spink@telus.net
-            [field_employer] => 
-
-                  
-
-                    
-                Sept
-                current
-                Employment Specialists
-                Abbotsford
-                BC
-                Job Title: 
-                Restoration and Laborer
-                  
-
-
-                Edit
-
-                Delete
-
-                , 
-
-                  
-
-                    
-                Oct 2010
-                Oct 2012
-                14th AVe Liquor Store
-                Mission 
-                BC
-                Job Title: 
-                Night Shift Manager
-                  
-
-
-                Edit
-
-                Delete
-
-                , 
-
-                  
-
-                    
-                Sept 2003
-                Aug 2011
-                Mission Icebreakers Jr Hockey Club
-                Mission 
-                BC
-                Job Title: 
-                Owner/Operator
-                  
-
-
-                Edit
-
-                Delete
-
-                , 
-
-                  
-
-                    
-                Sept 2010
-                Current
-                Mission School District 75
-                Mission
-                BC
-                Job Title: 
-                Noon Hr Supervisor Assistant
-                  
-
-
-                Edit
-
-                Delete
-
-
-            [field_interests_activities] => 
-            [field_objective] => Customer Service Receptionist
-            [field_awards] => 
-                Serving It Right
-
-                Food Safe
-
-                Super Host
-
-                Super Host Japan
-
-                Enhanced Drivers Licence Class 5
-
-
-
-            [field_skills] => Filing & Data Archiving, Telephone Etique, Customer Service Skills over 10 yrs, Microsoft Word, Excel, Internet & Web Browsing, Typing WPM 40, Management and Supervision
-            [field_volunteer] => 
-                Mission Minor Hockey
-
-
-
-        )
-
-  )
-  */
-  watchdog("CCC", "<pre>".print_r($output, true)."</pre>");
 
   if(count($vars['rows']) > 0 and isset($vars['rows'][0]->_field_data['nid']['entity'])){
     $node = $vars['rows'][0]->_field_data['nid']['entity'];
+    // watchdog("DDD", "<pre>".print_r($node, true)."</pre>");
     $name = $node->field_name['und'][0]['value'];
     $city = $node->field_city['und'][0]['value'];
     $address = $node->field_address['und'][0]['value'];
@@ -451,14 +306,49 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
     $province = $node->field_province['und'][0]['value'];
     $postal_code = $node->field_postal_code['und'][0]['value'];
     $email = $node->field_email['und'][0]['value'];
+    $objective = $node->field_objective['und'][0]['safe_value'];
+    $awards = $node->field_awards['und'][0]['safe_value'];
+    $volunteer = $node->field_volunteer['und'][0]['safe_value'];
+    $activities = $node->field_interests_activities['und'][0]['value'];
 
     $education = $node->field_education;
     $employer = $node->field_employer;
     $skills = $node->field_skills;
+    $reference = $node->field_referencesblock;
 
     $education_array = array();
     $employer_array = array();
     $skills_array = array();
+    // $awards_array = array();
+    // $volunteer_array = array();
+    // $activities_array = array();
+    $reference_array = array();
+
+    // parse reference as array
+    if (isset($reference['und']) and is_array($reference['und']) and count($reference['und']) > 0){
+      foreach ($reference['und'] as $key => $value) {
+        $rf_id = $value['value'];
+        $query = db_select('field_data_field_referencesblock', 'rf');
+        $query->join('field_data_field_job_title_ref', 'job_title', "job_title.entity_id = rf.field_referencesblock_value AND job_title.entity_type = 'field_collection_item' AND job_title.bundle = 'field_referencesblock'");
+        $query->join('field_data_field_phone_number_ref', 'phone_number', "phone_number.entity_id = rf.field_referencesblock_value AND phone_number.entity_type = 'field_collection_item' AND phone_number.bundle = 'field_referencesblock'");
+        $query->join('field_data_field_references', 'reference', "reference.entity_id = rf.field_referencesblock_value AND reference.entity_type = 'field_collection_item' AND reference.bundle = 'field_referencesblock'");
+        $query->fields('reference', array('field_references_value'));
+        $query->fields('job_title', array('field_job_title_ref_value'));
+        $query->fields('phone_number', array('field_phone_number_ref_value'));
+        $query->condition('rf.field_referencesblock_value', $rf_id, "=");
+        $result = $query->execute();
+        if(count($result) > 0){
+          $node_array = array();
+          foreach ($result as $row) {
+            $node_array["reference"] = $row->field_references_value;
+            $node_array["job_title"] = $row->field_job_title_ref_value;
+            $node_array["phone_number"] = $row->field_phone_number_ref_value;
+          }
+          $reference_array[$key] = $node_array;
+        }
+      }
+    }
+
     // parse education as array
     if (isset($education['und']) and is_array($education['und']) and count($education['und']) > 0){
       foreach ($education['und'] as $key => $value) {
@@ -470,14 +360,15 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
         $query->join('field_data_field_school_name_1', 'school', "school.entity_id = ed.field_education_value AND school.entity_type = 'field_collection_item' AND school.bundle = 'field_education'");
         $query->join('field_data_field_city', 'city', "city.entity_id = ed.field_education_value AND city.entity_type = 'field_collection_item' AND city.bundle = 'field_education'");
         $query->join('field_data_field_province', 'province', "province.entity_id = ed.field_education_value AND province.entity_type = 'field_collection_item' AND province.bundle = 'field_education'");
+        $query->join('field_data_field_details', 'details', "details.entity_id = ed.field_education_value AND details.entity_type = 'field_collection_item' AND details.bundle = 'field_education'");
         $query->fields('program', array('field_program_value'));
         $query->fields('city', array('field_city_value'));
         $query->fields('province', array('field_province_value'));
+        $query->fields('details', array('field_details_value'));
         $query->fields('date', array('field_static_grad_date_value'));
         $query->fields('school', array('field_school_name_1_value'));
         $query->condition('ed.field_education_value', $ed_id, "=");
         $result = $query->execute();
-
 
         if(count($result) > 0){
           $node_array = array();
@@ -485,13 +376,12 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
             $node_array["date"] = $row->field_static_grad_date_value;
             $node_array["city"] = $row->field_city_value;
             $node_array["province"] = $row->field_province_value;
+            $node_array["details"] = $row->field_details_value;
             $node_array["program"] = $row->field_program_value;
             $node_array["school"] = $row->field_school_name_1_value;
           }
           $education_array[$key] = $node_array;
         }
-
-
         
       }
     }
@@ -518,7 +408,6 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
         $query->condition('ed.field_employer_value', $em_id, "=");
         $result = $query->execute();
 
-        watchdog("CCC", "<pre>".print_r($result, true)."</pre>");
         if(count($result) > 0){
           $node_array = array();
           foreach ($result as $row) {
@@ -548,24 +437,34 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
 '.$phone.' | '.$email.'</p>
 </div>
 <br>
+<div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Objective
+</div>
+
+<table style="border:none">
+<tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px;padding-top:5px;">
+<td>
+'.$objective.'
+</td>
+</tr>
+</table>
+<br>
 <div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Work Experience
 </div>
 
 <table style="border:none">';
-    watchdog("CCC", "<pre>".print_r($employer_array, true)."</pre>");
     foreach ($employer_array as $key => $value) {
       $output .= '
 
-    <tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px">
-    <td class="col-sm-2" style="width:25%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['start_date'].' - '.$value['end_date'].'<br>
+    <tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px;padding-top:5px;">
+    <td class="col-sm-2" style="width:30%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['start_date'].' - '.$value['end_date'].'<br>
     '.$value['city'].', '.$value['province'].'</td>
 
-    <td class="col-sm-10" style="width:75%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['job_title'].' | '.$value['employer'].(empty($value['duties']) ? '' : '
+    <td class="col-sm-10" style="width:70%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['job_title'].' | '.$value['employer'].(empty($value['duties']) ? '<ul></ul>' : '
     <ul>
-      '.$value['duties'].'
+      '.str_replace('</p>', '</li>', str_replace('<p>', '<li>', str_replace('<br>', '</li><li>', str_replace('<br />', '</li><li>',$value['duties'])))).'
     </ul>').'
     </td>
-    </tr>';
+    </tr><tr style="height:12px;"></tr>';
     }
 
 $output .= '</table>
@@ -575,32 +474,79 @@ $output .= '</table>
 
 <table style="border:none">';
     foreach ($education_array as $key => $value) {
-      $output .= '<tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px">
-<td class="col-sm-2" style="width:25%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['date'].'<br>
+      $output .= '<tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px;padding-top:5px;">
+<td class="col-sm-2" style="width:30%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['date'].'<br>
 '.$value['city'].', '.$value['province'].'</td>
-
-<td class="col-sm-10" style="width:75%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['school'].'<br>
-<em>'.$value['program'].'</em></td>
-</tr>';
+<td class="col-sm-10" style="width:70%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['school'].'<br>
+<em>'.$value['program'].'</em>'
+.(empty($value['details']) ? '' : '<br><b>Details:</b><br><ul>'.str_replace('<p>', '<li>', str_replace('</p>', '</li>', str_replace('<br>', '</li><li>', str_replace('<br />', '</li><li>', $value['details'])))))
+.'</ul></td></tr>';
     }
 
     $output .= '</table>
 <br>
-<div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Additional Skills &amp; Interest
+<div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Skills
 </div>
-
+<br>
 <table style="border:none">
-<trclass="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px"><td>
+<trclass="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>
 <ul>';
     foreach ($skills_array as $key => $value) {
       $output .= '<li>'.$value.'</li>';
     }
     
     $output .= '</ul></td></tr>
+</table>
+<br>
+<div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Awards
+</div>
+<br>
+<table style="border:none">
+<tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>
+<ul>'.(empty($awards) ? '' : str_replace('<p>', '<li>', str_replace('</p>', '</li>', str_replace('<br>', '</li><li>', str_replace('<br />', '</li><li>', $awards)))))
+.'</ul>
+</td>
+</tr>
+</table>
+<br>
+<div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Volunteer
+</div>
+<br>
+<table style="border:none">
+<tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>
+<ul>'.(empty($volunteer) ? '' : str_replace('<p>', '<li>', str_replace('</p>', '</li>', str_replace('<br>', '</li><li>', str_replace('<br />', '</li><li>', $volunteer)))))
+.'</ul>
+</td>
+</tr>
+</table>
+<br>
+<div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Interests and Activities
+</div>
+<br>
+<table style="border:none">
+<tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>
+<ul>'.(empty($activities) ? '' : str_replace('<p>', '<li>', str_replace('</p>', '</li>', str_replace('<br>', '</li><li>', str_replace('<br />', '</li><li>', $activities)))))
+.'</ul>
+</td>
+</tr>
+</table>
+<br>
+<div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">References
+</div>
+<br>
+<table style="border:none">
+<tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>
+<ul>';
+    foreach ($reference_array as $key => $value) {
+      $output .= '<li><p><b>'.$value['reference'].'</b> - <em>'.$value['job_title'].'</em>  Tel: '.$value['phone_number'].'</p></li>';
+    }
+    
+    $output .= '</ul>
+</td>
+</tr>
     </div>
     </div>';
   }
-  watchdog("BBB", "<pre>".print_r($skills_array, true)."</pre>");
 
 
   // foreach ($vars['themed_rows'] as $number => $row) {
