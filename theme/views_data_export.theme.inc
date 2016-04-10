@@ -298,7 +298,6 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
 
   if(count($vars['rows']) > 0 and isset($vars['rows'][0]->_field_data['nid']['entity'])){
     $node = $vars['rows'][0]->_field_data['nid']['entity'];
-    // watchdog("DDD", "<pre>".print_r($node, true)."</pre>");
     $name = $node->field_name['und'][0]['value'];
     $city = $node->field_city['und'][0]['value'];
     $address = $node->field_address['und'][0]['value'];
@@ -306,10 +305,16 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
     $province = $node->field_province['und'][0]['value'];
     $postal_code = $node->field_postal_code['und'][0]['value'];
     $email = $node->field_email['und'][0]['value'];
+
     $objective = $node->field_objective['und'][0]['safe_value'];
+    // watchdog("DDD", "<pre>".print_r($objective, true)."</pre>");
     $awards = $node->field_awards['und'][0]['safe_value'];
     $volunteer = $node->field_volunteer['und'][0]['safe_value'];
     $activities = $node->field_interests_activities['und'][0]['value'];
+    $objective = str_replace("\n", '<br />', $objective);
+    // $awards = str_replace("\n", '</p><p>', $awards);
+    // $volunteer = str_replace("\n", '</p><p>', $volunteer);
+    $activities = str_replace('\n', '<br />', $activities);
 
     $education = $node->field_education;
     $employer = $node->field_employer;
@@ -377,6 +382,8 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
             $node_array["city"] = $row->field_city_value;
             $node_array["province"] = $row->field_province_value;
             $node_array["details"] = $row->field_details_value;
+            // watchdog("DDD", "<pre>".print_r($node_array["details"], true)."</pre>");
+            $node_array["details"] = str_replace("\n", '<br />', $node_array["details"]);
             $node_array["program"] = $row->field_program_value;
             $node_array["school"] = $row->field_school_name_1_value;
           }
@@ -418,11 +425,13 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
             $node_array["job_title"] = $row->field_job_title_value;
             $node_array["employer"] = $row->field_employer_name_1_value;
             $node_array["duties"] = $row->field_duties_1_value;
+            $node_array["duties"] = str_replace('\n', '<br />', $node_array["duties"]);
           }
           $employer_array[$key] = $node_array;
         }
       }
     }
+
     // parse skills as array
     if (isset($skills['und']) and is_array($skills['und']) and count($skills['und']) > 0){
       foreach ($skills['und'] as $key => $value) {
@@ -433,63 +442,71 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
     $output = '<div style="margin-bottom:24px">
 <p align="center"><strong>'.$name.'</strong><br>
 '.$address.'<br>
-'.$city.', '.$province.'<br>
+'.$city.', '.$province.' '.$postal_code.'<br>
 '.$phone.' | '.$email.'</p>
 </div>
 <br>
-<div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Objective
+<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Objective
 </div>
 
 <table style="border:none">
-<tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px;padding-top:5px;">
+<tr class="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;">
 <td>
 '.$objective.'
 </td>
 </tr>
 </table>
 <br>
-<div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Work Experience
+<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Work Experience
 </div>
 
 <table style="border:none">';
     foreach ($employer_array as $key => $value) {
       $output .= '
 
-    <tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px;padding-top:5px;">
+    <tr class="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;">
     <td class="col-sm-2" style="width:30%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['start_date'].' - '.$value['end_date'].'<br>
     '.$value['city'].', '.$value['province'].'</td>
 
-    <td class="col-sm-10" style="width:70%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['job_title'].' | '.$value['employer'].(empty($value['duties']) ? '<ul></ul>' : '
-    <ul>
-      '.str_replace('</p>', '</li>', str_replace('<p>', '<li>', str_replace('<br>', '</li><li>', str_replace('<br />', '</li><li>',$value['duties'])))).'
-    </ul>').'
+    <td class="col-sm-10" style="width:70%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['job_title'].' | '.$value['employer'].(empty($value['duties']) ? '' : '
+    <br>
+      '.$value['duties']).'
     </td>
     </tr><tr style="height:12px;"></tr>';
     }
 
 $output .= '</table>
 <br>
-<div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Education
+<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Volunteer
+</div>
+<br>
+<table style="border:none">
+<tr class="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>'.$volunteer
+.'</td>
+</tr>
+</table>
+<br>
+<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Education
 </div>
 
 <table style="border:none">';
     foreach ($education_array as $key => $value) {
-      $output .= '<tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px;padding-top:5px;">
+      $output .= '<tr class="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;">
 <td class="col-sm-2" style="width:30%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['date'].'<br>
 '.$value['city'].', '.$value['province'].'</td>
 <td class="col-sm-10" style="width:70%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['school'].'<br>
 <em>'.$value['program'].'</em>'
-.(empty($value['details']) ? '' : '<br><b>Details:</b><br><ul>'.str_replace('<p>', '<li>', str_replace('</p>', '</li>', str_replace('<br>', '</li><li>', str_replace('<br />', '</li><li>', $value['details'])))))
-.'</ul></td></tr>';
+.(empty($value['details']) ? '' : '<br><b>Details:</b><br>'.$value['details'])
+.'</td></tr>';
     }
 
     $output .= '</table>
 <br>
-<div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Skills
+<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Skills
 </div>
 <br>
 <table style="border:none">
-<trclass="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>
+<trclass="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>
 <ul>';
     foreach ($skills_array as $key => $value) {
       $output .= '<li>'.$value.'</li>';
@@ -498,44 +515,29 @@ $output .= '</table>
     $output .= '</ul></td></tr>
 </table>
 <br>
-<div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Awards
+<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Awards
 </div>
 <br>
 <table style="border:none">
-<tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>
-<ul>'.(empty($awards) ? '' : str_replace('<p>', '<li>', str_replace('</p>', '</li>', str_replace('<br>', '</li><li>', str_replace('<br />', '</li><li>', $awards)))))
-.'</ul>
-</td>
+<tr class="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>'.$awards
+.'</td>
 </tr>
 </table>
 <br>
-<div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Volunteer
+<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Interests and Activities
 </div>
 <br>
 <table style="border:none">
-<tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>
-<ul>'.(empty($volunteer) ? '' : str_replace('<p>', '<li>', str_replace('</p>', '</li>', str_replace('<br>', '</li><li>', str_replace('<br />', '</li><li>', $volunteer)))))
-.'</ul>
-</td>
+<tr class="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>'.$activities
+.'</td>
 </tr>
 </table>
 <br>
-<div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Interests and Activities
+<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">References
 </div>
 <br>
 <table style="border:none">
-<tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>
-<ul>'.(empty($activities) ? '' : str_replace('<p>', '<li>', str_replace('</p>', '</li>', str_replace('<br>', '</li><li>', str_replace('<br />', '</li><li>', $activities)))))
-.'</ul>
-</td>
-</tr>
-</table>
-<br>
-<div class="header" style="margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">References
-</div>
-<br>
-<table style="border:none">
-<tr class="row" style="margin-left: -15px;margin-right: -15px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>
+<tr class="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>
 <ul>';
     foreach ($reference_array as $key => $value) {
       $output .= '<li><p><b>'.$value['reference'].'</b> - <em>'.$value['job_title'].'</em>  Tel: '.$value['phone_number'].'</p></li>';
