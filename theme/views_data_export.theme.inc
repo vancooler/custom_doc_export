@@ -314,7 +314,7 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
     $objective = str_replace("\n", '<br />', $objective);
     // $awards = str_replace("\n", '</p><p>', $awards);
     // $volunteer = str_replace("\n", '</p><p>', $volunteer);
-    $activities = str_replace('\n', '<br />', $activities);
+    $activities = str_replace("\n", '<br />', $activities);
 
     $education = $node->field_education;
     $employer = $node->field_employer;
