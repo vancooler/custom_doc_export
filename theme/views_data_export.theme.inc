@@ -425,7 +425,7 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
             $node_array["job_title"] = $row->field_job_title_value;
             $node_array["employer"] = $row->field_employer_name_1_value;
             $node_array["duties"] = $row->field_duties_1_value;
-            $node_array["duties"] = str_replace('\n', '<br />', $node_array["duties"]);
+            $node_array["duties"] = str_replace("\n", '<br />', $node_array["duties"]);
           }
           $employer_array[$key] = $node_array;
         }
