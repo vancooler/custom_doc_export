@@ -334,9 +334,9 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
       foreach ($reference['und'] as $key => $value) {
         $rf_id = $value['value'];
         $query = db_select('field_data_field_referencesblock', 'rf');
-        $query->join('field_data_field_job_title_ref', 'job_title', "job_title.entity_id = rf.field_referencesblock_value AND job_title.entity_type = 'field_collection_item' AND job_title.bundle = 'field_referencesblock'");
-        $query->join('field_data_field_phone_number_ref', 'phone_number', "phone_number.entity_id = rf.field_referencesblock_value AND phone_number.entity_type = 'field_collection_item' AND phone_number.bundle = 'field_referencesblock'");
-        $query->join('field_data_field_references', 'reference', "reference.entity_id = rf.field_referencesblock_value AND reference.entity_type = 'field_collection_item' AND reference.bundle = 'field_referencesblock'");
+        $query->leftJoin('field_data_field_job_title_ref', 'job_title', "job_title.entity_id = rf.field_referencesblock_value AND job_title.entity_type = 'field_collection_item' AND job_title.bundle = 'field_referencesblock'");
+        $query->leftJoin('field_data_field_phone_number_ref', 'phone_number', "phone_number.entity_id = rf.field_referencesblock_value AND phone_number.entity_type = 'field_collection_item' AND phone_number.bundle = 'field_referencesblock'");
+        $query->leftJoin('field_data_field_references', 'reference', "reference.entity_id = rf.field_referencesblock_value AND reference.entity_type = 'field_collection_item' AND reference.bundle = 'field_referencesblock'");
         $query->fields('reference', array('field_references_value'));
         $query->fields('job_title', array('field_job_title_ref_value'));
         $query->fields('phone_number', array('field_phone_number_ref_value'));
@@ -360,12 +360,12 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
         $ed_id = $value['value'];
 
         $query = db_select('field_data_field_education', 'ed');
-        $query->join('field_data_field_program', 'program', "program.entity_id = ed.field_education_value AND program.entity_type = 'field_collection_item' AND program.bundle = 'field_education'");
-        $query->join('field_data_field_static_grad_date', 'date', "date.entity_id = ed.field_education_value AND date.entity_type = 'field_collection_item' AND date.bundle = 'field_education'");
-        $query->join('field_data_field_school_name_1', 'school', "school.entity_id = ed.field_education_value AND school.entity_type = 'field_collection_item' AND school.bundle = 'field_education'");
-        $query->join('field_data_field_city', 'city', "city.entity_id = ed.field_education_value AND city.entity_type = 'field_collection_item' AND city.bundle = 'field_education'");
-        $query->join('field_data_field_province', 'province', "province.entity_id = ed.field_education_value AND province.entity_type = 'field_collection_item' AND province.bundle = 'field_education'");
-        $query->join('field_data_field_details', 'details', "details.entity_id = ed.field_education_value AND details.entity_type = 'field_collection_item' AND details.bundle = 'field_education'");
+        $query->leftJoin('field_data_field_program', 'program', "program.entity_id = ed.field_education_value AND program.entity_type = 'field_collection_item' AND program.bundle = 'field_education'");
+        $query->leftJoin('field_data_field_static_grad_date', 'date', "date.entity_id = ed.field_education_value AND date.entity_type = 'field_collection_item' AND date.bundle = 'field_education'");
+        $query->leftJoin('field_data_field_school_name_1', 'school', "school.entity_id = ed.field_education_value AND school.entity_type = 'field_collection_item' AND school.bundle = 'field_education'");
+        $query->leftJoin('field_data_field_city', 'city', "city.entity_id = ed.field_education_value AND city.entity_type = 'field_collection_item' AND city.bundle = 'field_education'");
+        $query->leftJoin('field_data_field_province', 'province', "province.entity_id = ed.field_education_value AND province.entity_type = 'field_collection_item' AND province.bundle = 'field_education'");
+        $query->leftJoin('field_data_field_details', 'details', "details.entity_id = ed.field_education_value AND details.entity_type = 'field_collection_item' AND details.bundle = 'field_education'");
         $query->fields('program', array('field_program_value'));
         $query->fields('city', array('field_city_value'));
         $query->fields('province', array('field_province_value'));
@@ -375,6 +375,8 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
         $query->condition('ed.field_education_value', $ed_id, "=");
         $result = $query->execute();
 
+        watchdog("FFF", "<pre>".print_r($query, true)."</pre>");
+        watchdog("FFF", "<pre>".print_r($result, true)."</pre>");
         if(count($result) > 0){
           $node_array = array();
           foreach ($result as $row) {
