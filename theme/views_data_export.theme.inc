@@ -442,73 +442,66 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
     }
 
     $output = '<div style="margin-bottom:24px">
-<p align="center"><strong>'.$name.'</strong><br>
-'.$address.'<br>
-'.$city.', '.$province.' '.$postal_code.'<br>
+<p align="center"><strong>'.$name.'</strong><br />
+'.$address.'<br />
+'.$city.', '.$province.' '.$postal_code.'<br />
 '.$phone.' | '.$email.'</p>
 </div>
-<br>
-<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Objective
+<br />
+<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:5px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Objective
 </div>
-
-<table style="border:none">
-<tr class="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;">
+<table style="border:none;page-break-inside:auto;">
+<tr class="row" style="page-break-inside:avoid; page-break-after:auto;margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;">
 <td>
 '.$objective.'
 </td>
 </tr>
 </table>
-<br>
-<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Work Experience
+<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:5px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Work Experience
 </div>
 
-<table style="border:none">';
+<table style="border:none;page-break-inside:auto;">';
     foreach ($employer_array as $key => $value) {
       $output .= '
 
-    <tr class="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;">
-    <td class="col-sm-2" style="width:30%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['start_date'].' - '.$value['end_date'].'<br>
+    <tr class="row" style="page-break-inside:avoid; page-break-after:auto;margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;">
+    <td class="col-sm-2" valign=top style="width:30%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['start_date'].' - '.$value['end_date'].'<br />
     '.$value['city'].', '.$value['province'].'</td>
 
     <td class="col-sm-10" style="width:70%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['job_title'].' | '.$value['employer'].(empty($value['duties']) ? '' : '
-    <br>
+    <br />
       '.$value['duties']).'
     </td>
     </tr><tr style="height:12px;"></tr>';
     }
 
 $output .= '</table>
-<br>
-<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Volunteer
+<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:5px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Volunteer
 </div>
-<br>
-<table style="border:none">
-<tr class="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>'.$volunteer
+<table style="border:none;page-break-inside:auto;">
+<tr class="row" style="page-break-inside:avoid; page-break-after:auto;margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>'.$volunteer
 .'</td>
 </tr>
 </table>
-<br>
-<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Education
+<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:5px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Education
 </div>
 
-<table style="border:none">';
+<table style="border:none;page-break-inside:auto;">';
     foreach ($education_array as $key => $value) {
-      $output .= '<tr class="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;">
-<td class="col-sm-2" style="width:30%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['date'].'<br>
+      $output .= '<tr class="row" style="page-break-inside:avoid; page-break-after:auto;margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;">
+<td class="col-sm-2" valign=top style="width:30%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['date'].'<br />
 '.$value['city'].', '.$value['province'].'</td>
-<td class="col-sm-10" style="width:70%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['school'].'<br>
+<td class="col-sm-10" style="width:70%;position: relative;min-height: 1px;padding-left: 15px;padding-right: 15px;float: left;">'.$value['school'].'<br />
 <em>'.$value['program'].'</em>'
-.(empty($value['details']) ? '' : '<br><b>Details:</b><br>'.$value['details'])
+.(empty($value['details']) ? '' : '<br /><b>Details:</b><br />'.$value['details'])
 .'</td></tr>';
     }
 
     $output .= '</table>
-<br>
-<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Skills
+<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:5px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Abilities
 </div>
-<br>
-<table style="border:none">
-<trclass="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>
+<table style="border:none;page-break-inside:auto;">
+<tr class="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>
 <ul>';
     foreach ($skills_array as $key => $value) {
       $output .= '<li>'.$value.'</li>';
@@ -516,30 +509,24 @@ $output .= '</table>
     
     $output .= '</ul></td></tr>
 </table>
-<br>
-<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Awards
+<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:5px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Awards
 </div>
-<br>
-<table style="border:none">
-<tr class="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>'.$awards
+<table style="border:none;page-break-inside:auto;">
+<tr class="row" style="page-break-inside:avoid; page-break-after:auto;margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>'.$awards
 .'</td>
 </tr>
 </table>
-<br>
-<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Interests and Activities
+<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:5px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">Interests and Activities
 </div>
-<br>
-<table style="border:none">
-<tr class="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>'.$activities
+<table style="border:none;page-break-inside:auto;">
+<tr class="row" style="page-break-inside:avoid; page-break-after:auto;margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>'.$activities
 .'</td>
 </tr>
 </table>
-<br>
-<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:18px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">References
+<div class="header" style="font-size:18px;margin-top:30px;margin-bottom:5px;font-weight: bold;border:1px solid #000000; border-collapse:collapse;vertical-align:bottom">References
 </div>
-<br>
-<table style="border:none">
-<tr class="row" style="margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>
+<table style="border:none;page-break-inside:auto;">
+<tr class="row" style="page-break-inside:avoid; page-break-after:auto;margin-left: 2px;margin-right: 2px;margin-top:5px;margin-bottom:5px;padding-top:5px;"><td>
 <ul>';
     foreach ($reference_array as $key => $value) {
       $output .= '<li><p><b>'.$value['reference'].'</b> - <em>'.$value['job_title'].'</em>  Tel: '.$value['phone_number'].'</p></li>';
@@ -548,8 +535,7 @@ $output .= '</table>
     $output .= '</ul>
 </td>
 </tr>
-    </div>
-    </div>';
+    </table>';
   }
 
 
